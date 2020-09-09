@@ -1273,13 +1273,47 @@ public abstract class EjbDescriptor extends CommonResourceDescriptor implements 
             this.convertMethodContainerTransactions();
         }
         containerTransaction = getMethodContainerTransactions().get(methodDescriptor);
+        
         if (containerTransaction == null) {
-            if (Descriptor.isBoundsChecking() && usesDefaultTransaction) {
-                containerTransaction = new ContainerTransaction(ContainerTransaction.REQUIRED, "");
-                getMethodContainerTransactions().put(methodDescriptor, containerTransaction);
+            
+            for (MethodDescriptor other : getMethodContainerTransactions().keySet()) {
+                
+                if (methodDescriptor.getName().equals(other.getName())
+                    && stringArrayEquals(methodDescriptor.getParameterClassNames(), other.getParameterClassNames())) {
+                       containerTransaction = getMethodContainerTransactions().get(other);
+                       break;
+                }
+            }
+            
+            if (containerTransaction == null) {
+                
+                if (Descriptor.isBoundsChecking() && usesDefaultTransaction) {
+                    containerTransaction = new ContainerTransaction(ContainerTransaction.REQUIRED, "");
+                    getMethodContainerTransactions().put(methodDescriptor, containerTransaction);
+                }
             }
         }
         return containerTransaction;
+    }
+    
+        
+    private boolean stringArrayEquals(String[] s1, String[] s2) {
+	if (s1 == null && s2 == null) {
+	    return true;
+	}
+	if (s1 == null || s2 == null) {
+	    return false;
+	}
+	if (s1.length == s2.length) {
+	    for (int i = 0; i < s1.length; i++) {
+		if (!s1[i].equals(s2[i])) {
+		    return false;
+		}
+	    }
+	    return true;
+	} else {
+	    return false;
+	}
     }
 
     private boolean needToConvertMethodContainerTransactions() {
