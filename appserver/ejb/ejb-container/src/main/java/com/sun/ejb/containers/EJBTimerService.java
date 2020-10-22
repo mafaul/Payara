@@ -1261,6 +1261,9 @@ public abstract class EJBTimerService {
                     } else {
                         logger.log(Level.INFO, "ejb.timer_exceeded_max_deliveries",
                            new Object[] { timerState.toString(), numDeliv});
+                        
+                        logger.log(Level.WARNING, "picksmart.ejb.timer_exceeded_max_deliveries. " + timerState.toString() + ". " + timerState.getInfo());
+                        
                         expungeTimer(timerId, true);
                     }
                 } else {

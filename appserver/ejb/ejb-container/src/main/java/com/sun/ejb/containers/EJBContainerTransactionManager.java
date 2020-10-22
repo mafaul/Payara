@@ -708,6 +708,7 @@ public class EJBContainerTransactionManager {
         if (transactionManager.isTimedOut()) {
             LOG.log(Level.WARNING, "ejb.tx_timeout",
                 new Object[] {transactionManager.getTransaction(), ejbDescriptor.getName()});
+            LOG.log(Level.WARNING, "picksmart.ejb.timeout. " + ejbDescriptor.getName() + ". " + transactionManager.getTransaction());
         }
         transactionManager.rollback();
     }
