@@ -69,6 +69,7 @@ import java.util.logging.Logger;
 
 import static com.sun.enterprise.deployment.MethodDescriptor.*;
 import static java.util.logging.Level.SEVERE;
+import javax.ejb.TransactionAttribute;
 
 /**
  * This abstract class encapsulates the meta-information describing Entity, Session and MessageDriven EJBs.
@@ -1283,6 +1284,46 @@ public abstract class EjbDescriptor extends CommonResourceDescriptor implements 
                     && stringArrayEquals(methodDescriptor.getParameterClassNames(), other.getParameterClassNames())) {
                        containerTransaction = getMethodContainerTransactions().get(other);
                        break;
+                }
+            }
+            
+            if (containerTransaction == null && this != null) {
+                Method method = methodDescriptor.getDeclaredMethod(this);
+                
+                if (method != null) {
+                    TransactionAttribute ta = method.getAnnotation(TransactionAttribute.class);
+
+                    if (ta != null) {
+                        String taString = null;
+
+                        switch(ta.value()) {
+                            case MANDATORY :
+                                taString = ContainerTransaction.MANDATORY;
+                                break;
+                            case NEVER :
+                                taString = ContainerTransaction.NEVER;
+                                break;
+                            case NOT_SUPPORTED :
+                                taString = ContainerTransaction.NOT_SUPPORTED;
+                                break;
+                            case REQUIRED :
+                                taString = ContainerTransaction.REQUIRED;
+                                break;
+                            case REQUIRES_NEW :
+                                taString = ContainerTransaction.REQUIRES_NEW;
+                                break;
+                            case SUPPORTS :
+                                taString = ContainerTransaction.SUPPORTS;
+                                break;
+                            default: 
+                                break;  
+                        }
+
+                        if (taString != null) {
+                            containerTransaction = new ContainerTransaction(taString, "");
+                            getMethodContainerTransactions().put(methodDescriptor, containerTransaction);
+                        }
+                    }
                 }
             }
             
